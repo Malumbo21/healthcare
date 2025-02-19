@@ -3,7 +3,6 @@
  "allow_copy": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "beta": 1,
  "creation": "2016-03-29 17:34:47.509094",
  "doctype": "DocType",
  "document_type": "Document",
@@ -13,18 +12,18 @@
   "template",
   "lab_test_name",
   "lab_test_group",
-  "medical_code",
   "department",
   "column_break_26",
   "company",
   "status",
+  "date",
+  "time",
   "submitted_date",
   "result_date",
   "approved_date",
   "expected_result_date",
   "expected_result_time",
   "printed_on",
-  "invoiced",
   "sb_first",
   "patient",
   "patient_name",
@@ -35,6 +34,7 @@
   "email",
   "mobile",
   "c_b",
+  "service_unit",
   "practitioner",
   "practitioner_name",
   "requesting_department",
@@ -46,6 +46,8 @@
   "sb_normal",
   "lab_test_html",
   "normal_test_items",
+  "sb_descriptive_result",
+  "descriptive_result",
   "sb_descriptive",
   "descriptive_test_items",
   "organisms_section",
@@ -56,16 +58,22 @@
   "lab_test_comment",
   "sb_customresult",
   "custom_result",
+  "medical_coding_section",
+  "codification_table",
   "worksheet_section",
   "worksheet_instructions",
   "result_legend_section",
   "legend_print_position",
   "result_legend",
+  "more_information_section",
+  "service_request",
+  "invoiced",
   "section_break_50",
   "email_sent",
   "sms_sent",
   "printed",
   "normal_toggle",
+  "imaging_toggle",
   "descriptive_toggle",
   "sensitivity_toggle",
   "amended_from",
@@ -99,7 +107,6 @@
    "search_index": 1
   },
   {
-   "fetch_from": "inpatient_record.patient",
    "fieldname": "patient",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -206,7 +213,6 @@
   {
    "fieldname": "submitted_date",
    "fieldtype": "Datetime",
-   "hidden": 1,
    "label": "Submitted Date",
    "print_hide": 1,
    "report_hide": 1
@@ -342,14 +348,6 @@
    "options": "Item Group",
    "print_hide": 1,
    "report_hide": 1
-  },
-  {
-   "fetch_from": "template.medical_code",
-   "fieldname": "medical_code",
-   "fieldtype": "Link",
-   "label": "Medical Code",
-   "options": "Medical Code",
-   "read_only": 1
   },
   {
    "fieldname": "sb_normal",
@@ -555,14 +553,90 @@
    "label": "Organism Test Result",
    "options": "Organism Test Result",
    "print_hide": 1
+  },
+  {
+   "fieldname": "descriptive_result",
+   "fieldtype": "Text Editor",
+   "label": "Descriptive Result"
+  },
+  {
+   "fieldname": "sb_descriptive_result",
+   "fieldtype": "Section Break",
+   "label": "Descriptive Result"
+  },
+  {
+   "default": "0",
+   "fieldname": "imaging_toggle",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Time"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "medical_coding_section",
+   "fieldtype": "Section Break",
+   "label": "Medical Coding"
+  },
+  {
+   "fieldname": "codification_table",
+   "fieldtype": "Table",
+   "label": "Medical Codes",
+   "options": "Codification Table"
+  },
+  {
+   "fieldname": "service_unit",
+   "fieldtype": "Link",
+   "label": "Service Unit",
+   "options": "Healthcare Service Unit"
+  },
+  {
+   "fieldname": "service_request",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Service Request",
+   "no_copy": 1,
+   "options": "Service Request",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2020-11-30 11:04:17.195848",
+ "links": [
+  {
+   "link_doctype": "Nursing Task",
+   "link_fieldname": "reference_name"
+  }
+ ],
+ "modified": "2023-06-21 00:31:52.282467",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -597,6 +671,20 @@
    "role": "Physician",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "select": 1,
+   "share": 1,
+   "submit": 1,
+   "write": 1
   }
  ],
  "restrict_to_domain": "Healthcare",
@@ -604,6 +692,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "patient",
  "track_changes": 1,
  "track_seen": 1

@@ -3,7 +3,6 @@
  "allow_copy": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "beta": 1,
  "creation": "2017-02-02 11:00:24.853005",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -51,7 +50,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "inpatient_record.patient",
    "fieldname": "patient",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -73,7 +71,6 @@
    "fieldtype": "Link",
    "in_filter": 1,
    "label": "Patient Appointment",
-   "no_copy": 1,
    "options": "Patient Appointment",
    "print_hide": 1,
    "read_only": 1
@@ -83,7 +80,6 @@
    "fieldtype": "Link",
    "in_filter": 1,
    "label": "Patient Encounter",
-   "no_copy": 1,
    "options": "Patient Encounter",
    "print_hide": 1,
    "read_only": 1
@@ -100,6 +96,7 @@
    "reqd": 1
   },
   {
+   "default": "Now",
    "fieldname": "signs_time",
    "fieldtype": "Time",
    "label": "Time",
@@ -259,10 +256,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-17 22:23:24.632286",
+ "modified": "2024-03-07 12:14:26.166928",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Vital Signs",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -299,6 +297,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "title",
  "track_changes": 1,
  "track_seen": 1

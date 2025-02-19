@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
-
-from frappe.tests.utils import FrappeTestCase
 
 
-class TestHealthcareSettings(FrappeTestCase):
+from frappe.tests import IntegrationTestCase
+
+
+class TestHealthcareSettings(IntegrationTestCase):
 	pass
