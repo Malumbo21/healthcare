@@ -1,5 +1,6 @@
 // Copyright (c) 2016, ESS LLP and contributors
 // For license information, please see license.txt
+{% include 'healthcare/regional/india/abdm/js/patient.js' %}
 
 frappe.ui.form.on('Patient', {
 	refresh: function (frm) {
@@ -44,7 +45,7 @@ frappe.ui.form.on('Patient', {
 			if ((frappe.user.has_role('Nursing User') || frappe.user.has_role('Physician'))) {
 				frm.add_custom_button(__('Medical Record'), function () {
 					create_medical_record(frm);
-				}, 'Create');
+				}, __('Create'));
 				frm.toggle_enable(['customer'], 0);
 			}
 			frappe.contacts.render_address_and_contact(frm);
@@ -103,11 +104,10 @@ let create_medical_record = function (frm) {
 };
 
 let get_age = function (birth) {
-	let ageMS = Date.parse(Date()) - Date.parse(birth);
-	let age = new Date();
-	age.setTime(ageMS);
-	let years = age.getFullYear() - 1970;
-	return years + ' Year(s) ' + age.getMonth() + ' Month(s) ' + age.getDate() + ' Day(s)';
+	let birth_moment = moment(birth);
+	let current_moment = moment(Date());
+	let diff = moment.duration(current_moment.diff(birth_moment));
+	return `${diff.years()} ${__('Year(s)')} ${diff.months()} ${__('Month(s)')} ${diff.days()} ${__('Day(s)')}`
 };
 
 let create_vital_signs = function (frm) {

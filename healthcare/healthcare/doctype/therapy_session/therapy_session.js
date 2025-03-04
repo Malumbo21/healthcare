@@ -28,12 +28,34 @@ frappe.ui.form.on('Therapy Session', {
 				}
 			};
 		});
+
+		frm.set_query('service_request', function() {
+			return {
+				filters: {
+					'patient': frm.doc.patient,
+					'status': 'Active',
+					'docstatus': 1,
+					'template_dt': 'Therapy Type'
+				}
+			};
+		});
 	},
 
 	refresh: function(frm) {
 		if (frm.doc.therapy_plan) {
 			frm.trigger('filter_therapy_types');
 		}
+
+		frm.set_query("code_value", "codification_table", function(doc, cdt, cdn) {
+			let row = frappe.get_doc(cdt, cdn);
+			if (row.code_system) {
+				return {
+					filters: {
+						code_system: row.code_system
+					}
+				};
+			}
+		});
 
 		if (!frm.doc.__islocal) {
 			frm.dashboard.add_indicator(__('Counts Targeted: {0}', [frm.doc.total_counts_targeted]), 'blue');
@@ -163,9 +185,32 @@ frappe.ui.form.on('Therapy Session', {
 						exercise.counts_target = e.counts_target;
 						exercise.assistance_level = e.assistance_level;
 					});
+					frm.clear_table("codification_table")
+					$.each(data.message.codification_table, function(k, val) {
+						if (val.code_value) {
+							let mcode = frm.add_child("codification_table");
+							mcode.code_value = val.code_value
+							mcode.code_system = val.code_system
+							mcode.code = val.code
+							mcode.description = val.description
+							mcode.system = val.system
+						}
+					});
+					refresh_field("codification_table");
 					refresh_field('exercises');
 				}
 			});
+		} else {
+			frm.clear_table("codification_table")
+			frm.refresh_field("codification_table");
 		}
 	}
 });
+
+let calculate_age = function(birth) {
+	let ageMS = Date.parse(Date()) - Date.parse(birth);
+	let age = new Date();
+	age.setTime(ageMS);
+	let years =  age.getFullYear() - 1970;
+	return `${years} ${__('Years(s)')} ${age.getMonth()} ${__('Month(s)')} ${age.getDate()} ${__('Day(s)')}`;
+};

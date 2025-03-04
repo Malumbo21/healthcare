@@ -17,6 +17,25 @@ frappe.ui.form.on('Therapy Type', {
 				change_template_code(frm.doc);
 			});
 		}
+
+		frm.set_query("code_value", "codification_table", function(doc, cdt, cdn) {
+			let row = frappe.get_doc(cdt, cdn);
+			if (row.code_system) {
+				return {
+					filters: {
+						code_system: row.code_system
+					}
+				};
+			}
+		})
+
+		frm.set_query('staff_role', function () {
+			return {
+				filters: {
+					'restrict_to_domain': 'Healthcare'
+				}
+			};
+		});
 	},
 
 	therapy_type: function(frm) {
@@ -47,15 +66,6 @@ frappe.ui.form.on('Therapy Type', {
 		mark_change_in_item(frm);
 	},
 
-	medical_code: function(frm) {
-		frm.set_query("medical_code", function() {
-			return {
-				filters: {
-					medical_code_standard: frm.doc.medical_code_standard
-				}
-			};
-		});
-	}
 });
 
 let mark_change_in_item = function(frm) {

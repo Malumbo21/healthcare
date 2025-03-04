@@ -21,6 +21,17 @@ frappe.ui.form.on('Clinical Procedure', {
 				};
 			}
 		});
+
+		frm.set_query('service_request', function() {
+			return {
+				filters: {
+					'patient': frm.doc.patient,
+					'status': 'Active',
+					'docstatus': 1,
+					'template_dt': 'Clinical Procedure template'
+				}
+			};
+		});
 	},
 
 	refresh: function(frm) {
@@ -55,6 +66,17 @@ frappe.ui.form.on('Clinical Procedure', {
 					'department': frm.doc.medical_department
 				}
 			};
+		});
+
+		frm.set_query("code_value", "codification_table", function(doc, cdt, cdn) {
+			let row = frappe.get_doc(cdt, cdn);
+			if (row.code_system) {
+				return {
+					filters: {
+						code_system: row.code_system
+					}
+				};
+			}
 		});
 
 		if (frm.doc.consume_stock) {
@@ -131,6 +153,20 @@ frappe.ui.form.on('Clinical Procedure', {
 				}).addClass("btn-primary");
 			}
 		}
+		if(frm.doc.__islocal) {
+			frm.add_custom_button(__('Get from Patient Encounter'), function () {
+				get_procedure_prescribed(frm);
+			});
+		}
+
+		frm.add_custom_button(__("Clinical Note"), function() {
+			frappe.route_options = {
+				"patient": frm.doc.patient,
+				"reference_doc": "Clinical Procedure",
+				"reference_name": frm.doc.name}
+					frappe.new_doc("Clinical Note");
+		},__('Create'));
+
 	},
 
 	onload: function(frm) {
@@ -223,8 +259,12 @@ frappe.ui.form.on('Clinical Procedure', {
 					frm.set_value('consume_stock', data.message.consume_stock);
 					frm.events.set_warehouse(frm);
 					frm.events.set_procedure_consumables(frm);
+					frm.events.set_medical_codes(frm);
 				}
 			});
+		} else {
+			frm.clear_table("codification_table")
+			frm.refresh_field("codification_table");
 		}
 	},
 
@@ -303,7 +343,33 @@ frappe.ui.form.on('Clinical Procedure', {
 				}
 			}
 		});
-	}
+	},
+
+	set_medical_codes: function(frm) {
+		frappe.call({
+			"method": "healthcare.healthcare.utils.get_medical_codes",
+			args: {
+				template_dt: "Clinical Procedure Template",
+				template_dn: frm.doc.procedure_template,
+			},
+			callback: function(r) {
+				if (!r.exc && r.message) {
+					frm.doc.codification_table = []
+					$.each(r.message, function(k, val) {
+						if (val.code_value) {
+							var child = cur_frm.add_child("codification_table");
+							child.code_value = val.code_value
+							child.code_system = val.code_system
+							child.code = val.code
+							child.description = val.description
+							child.system = val.system
+						}
+					});
+					frm.refresh_field("codification_table");
+				}
+			}
+		})
+	},
 
 });
 
@@ -375,3 +441,67 @@ cur_frm.set_query('item_code', 'items', function() {
 		}
 	};
 });
+
+let get_procedure_prescribed = function(frm){
+	if(frm.doc.patient){
+		frappe.call({
+			method:"healthcare.healthcare.doctype.clinical_procedure.clinical_procedure.get_procedure_prescribed",
+			args: {patient: frm.doc.patient},
+			callback: function(r){
+				show_procedure_templates(frm, r.message);
+			}
+		});
+	}
+	else{
+		frappe.msgprint(__("Please select Patient to get prescribed procedure"));
+	}
+};
+
+
+let show_procedure_templates = function(frm, result){
+	var d = new frappe.ui.Dialog({
+		title: __("Prescribed Procedures"),
+		fields: [{
+				fieldtype: "HTML", fieldname: "procedure_template"
+		}]
+	});
+	var html_field = d.fields_dict.procedure_template.$wrapper;
+	html_field.empty();
+	$.each(result, function(x, y){
+		var row = $(repl(
+			'<div class="col-xs-12 row" style="padding-top:12px;">\
+				<div class="col-xs-3"> %(procedure_template)s </div>\
+				<div class="col-xs-4">%(encounter)s</div>\
+				<div class="col-xs-3"> %(date)s </div>\
+				<div class="col-xs-1">\
+				<a data-name="%(name)s" data-procedure-template="%(procedure_template)s"\
+					data-encounter="%(encounter)s" data-practitioner="%(practitioner)s"\
+					data-invoiced="%(invoiced)s" data-source="%(source)s"\
+					href="#"><button class="btn btn-default btn-xs">Get</button></a>\
+				</div>\
+			</div><hr>',
+			{ procedure_template: y[0], encounter: y[1], invoiced: y[2], practitioner: y[3], date: y[4],
+				name: y[5]})
+			).appendTo(html_field);
+			row.find("a").click(function() {
+			frm.doc.procedure_template = $(this).attr("data-procedure-template");
+			frm.doc.service_request = $(this).attr('data-name');
+			frm.doc.practitioner = $(this).attr("data-practitioner");
+			frm.doc.invoiced = 0;
+			if ($(this).attr('data-invoiced') === "Invoiced") {
+				frm.doc.invoiced = 1;
+			}
+			frm.refresh_field("procedure_template");
+			frm.refresh_field("service_request");
+			frm.refresh_field("practitioner");
+			frm.refresh_field('invoiced');
+			d.hide();
+			return false;
+		});
+	});
+	if(!result || result.length < 1){
+		var msg = "There are no procedure prescribed for patient "+frm.doc.patient;
+		$(repl('<div class="text-left">%(msg)s</div>', {msg: msg})).appendTo(html_field);
+	}
+	d.show();
+};

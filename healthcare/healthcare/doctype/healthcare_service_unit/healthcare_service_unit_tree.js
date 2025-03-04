@@ -5,6 +5,7 @@ frappe.treeview_settings['Healthcare Service Unit'] = {
 	title: __('Service Unit Tree'),
 	get_tree_root: false,
 	get_tree_nodes: 'healthcare.healthcare.utils.get_children',
+	add_tree_node: 'healthcare.healthcare.utils.add_node',
 	filters: [{
 		fieldname: 'company',
 		fieldtype: 'Select',
@@ -24,7 +25,7 @@ frappe.treeview_settings['Healthcare Service Unit'] = {
 		{
 			fieldtype: 'Link', fieldname: 'service_unit_type', label: __('Service Unit Type'),
 			options: 'Healthcare Service Unit Type', description: __('Type of the new Service Unit'),
-			depends_on: 'eval:!doc.is_group', default: '',
+			depends_on: 'eval:!doc.is_group', default: '', mandatory_depends_on: 'eval:!doc.is_group',
 			onchange: () => {
 				if (cur_dialog) {
 					if (cur_dialog.fields_dict.service_unit_type.value) {
@@ -66,19 +67,19 @@ frappe.treeview_settings['Healthcare Service Unit'] = {
 	ignore_fields: ['parent_healthcare_service_unit'],
 	onrender: function (node) {
 		if (node.data.occupied_of_available !== undefined) {
-			$("<span class='balance-area pull-right text-muted small'>"
+			$("<span class='occupancy-status-area pull-right text-muted'>"
 				+ ' ' + node.data.occupied_of_available
 				+ '</span>').insertBefore(node.$ul);
 		}
 		if (node.data && node.data.inpatient_occupancy !== undefined) {
 			if (node.data.inpatient_occupancy == 1) {
 				if (node.data.occupancy_status == 'Occupied') {
-					$("<span class='balance-area pull-right small'>"
+					$("<span class='occupancy-status-area pull-right text-muted'>"
 						+ ' ' + node.data.occupancy_status
 						+ '</span>').insertBefore(node.$ul);
 				}
 				if (node.data.occupancy_status == 'Vacant') {
-					$("<span class='balance-area pull-right text-muted small'>"
+					$("<span class='occupancy-status-area pull-right text-muted'>"
 						+ ' ' + node.data.occupancy_status
 						+ '</span>').insertBefore(node.$ul);
 				}
